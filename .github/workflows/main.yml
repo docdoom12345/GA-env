@@ -34,7 +34,7 @@ jobs:
       run: |
         echo "Waiting for MySQL to be ready..."
         for i in {1..30}; do
-          mysqladmin -h 127.0.0.1 -P 3306 -u root -p$DB_PASSWORD --protocol=tcp ping &> /dev/null && break
+          mysqladmin -h 127.0.0.1 -P 3306 -uroot -p$DB_PASSWORD ping &> /dev/null && break
           echo "MySQL is not ready yet... retrying in 2 seconds."
           sleep 2
         done
