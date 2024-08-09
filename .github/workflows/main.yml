@@ -4,16 +4,13 @@ on:
   push:
     branches:
       - main
-
+env:
+  DB_USER: test
+  DB_PASSWORD: test123
+  DB_NAME: testing
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    env:
-      DB_USER: test
-      DB_PASSWORD: test123
-      DB_NAME: testing
-
     services:
       postgres:
         image: postgres:13
