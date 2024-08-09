@@ -1,60 +1,30 @@
-name: Using MySQL with Environment Variables
+name: Example
 
-on: 
+on:
   push:
-    branches:
-      - main
 
 jobs:
-  build:
-    env:
-      DB_USER: test
-      DB_PASSWORD: test123
-      DB_NAME: testing
-    runs-on: ubuntu-latest
+  job-with-mysql-8_0:
+    runs-on: ubuntu-20.04
     services:
-      mysql:
-        image: mysql:8
-        env:
-          MYSQL_ROOT_PASSWORD: $DB_PASSWORD
-          MYSQL_DATABASE: $DB_NAME
-          MYSQL_USER: $DB_USER
-          MYSQL_PASSWORD: $DB_PASSWORD
+      db:
+        image: mysql:8.0
         ports:
           - 3306:3306
-
+        env:
+          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: foo
+          MYSQL_USER: user1
+          MYSQL_PASSWORD: user1_password
+        options: >-
+          --health-cmd "mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
-
-    - name: Install MySQL Client
-      run: sudo apt-get install -y mysql-client
-
-    - name: Wait for MySQL to be ready
-      run: |
-        echo "Waiting for MySQL to be ready..."
-        for i in {1..30}; do
-          mysqladmin -h 127.0.0.1 -P 3306 -u root -p$DB_PASSWORD --protocol=tcp ping &> /dev/null && break
-          echo "MySQL is not ready yet... retrying in 2 seconds."
-          sleep 2
-        done
-
-    - name: Check MySQL Connectivity
-      run: |
-        echo "Checking MySQL connectivity as root..."
-        mysql -h 127.0.0.1 -P 3306 -u root -p$DB_PASSWORD --protocol=tcp -e "SHOW DATABASES;"
-        echo "Checking MySQL connectivity as test user..."
-        mysql -h 127.0.0.1 -P 3306 -u $DB_USER -p$DB_PASSWORD --protocol=tcp -e "SHOW DATABASES;"
-
-    - name: Grant Permissions to Test User
-      run: |
-        mysql -h 127.0.0.1 -P 3306 -u root -p$DB_PASSWORD --protocol=tcp -e "CREATE DATABASE IF NOT EXISTS $DB_NAME; GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD'; FLUSH PRIVILEGES;"
-
-    - name: Create Table and Insert Data
-      run: |
-        mysql -h 127.0.0.1 -P 3306 -u $DB_USER -p$DB_PASSWORD $DB_NAME --protocol=tcp -e "CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50));"
-        mysql -h 127.0.0.1 -P 3306 -u $DB_USER -p$DB_PASSWORD $DB_NAME --protocol=tcp -e "INSERT INTO users (name) VALUES ('Alice'), ('Bob');"
-
-    - name: Query Data
-      run: |
-        mysql -h 127.0.0.1 -P 3306 -u $DB_USER -p$DB_PASSWORD $DB_NAME --protocol=tcp -e "SELECT * FROM users;"
+      - name: Show Docker containers
+        run: docker ps -a
+      - name: Show databases for root user
+        run: mysql --protocol=tcp -h localhost -P 3306 -u root -proot_password -e "SHOW DATABASES"
+      - name: Show databases for user1
+        run: mysql --protocol=tcp -h localhost -P 3306 -u user1 -puser1_password -e "SHOW DATABASES"
