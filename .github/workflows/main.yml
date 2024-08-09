@@ -1,4 +1,4 @@
-name: Using Database with environment variables
+name: Using database with Environment Variables
 
 on: 
   push:
@@ -13,33 +13,37 @@ jobs:
       DB_NAME: testing
     runs-on: ubuntu-latest
     services:
-      postgres:
-        image: postgres:13
+      mysql:
+        image: mysql:8
         env:
-          POSTGRES_USER: $DB_USER
-          POSTGRES_PASSWORD: $DB_PASSWORD
-          POSTGRES_DB: $DB_NAME
+          MYSQL_ROOT_PASSWORD: $DB_PASSWORD
+          MYSQL_DATABASE: $DB_NAME
+          MYSQL_USER: $DB_USER
+          MYSQL_PASSWORD: $DB_PASSWORD
         ports:
-          - 5432:5432
+          - 3306:3306
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v2
 
-    - name: Install PostgreSQL Client
-      run: sudo apt-get install -y postgresql-client
+    - name: Install MySQL Client
+      run: sudo apt-get install -y mysql-client
 
-    - name: Wait for PostgreSQL to be ready
+    - name: Wait for MySQL to be ready
       run: |
-        until pg_isready -h localhost -p 5432; do
-          sleep 1
+        echo "Waiting for MySQL to be ready..."
+        for i in {1..30}; do
+          mysqladmin -h localhost -u $DB_USER -p$DB_PASSWORD ping &> /dev/null && break
+          echo "MySQL is not ready yet... retrying in 2 seconds."
+          sleep 2
         done
 
     - name: Create Table and Insert Data
       run: |
-        PGPASSWORD=$DB_PASSWORD psql -h localhost -U $DB_USER -d $DB_NAME -c "CREATE TABLE users (id SERIAL PRIMARY KEY, name VARCHAR(50));"
-        PGPASSWORD=$DB_PASSWORD psql -h localhost -U $DB_USER -d $DB_NAME -c "INSERT INTO users (name) VALUES ('Alice'), ('Bob');"
+        mysql -h localhost -u $DB_USER -p$DB_PASSWORD $DB_NAME -e "CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50));"
+        mysql -h localhost -u $DB_USER -p$DB_PASSWORD $DB_NAME -e "INSERT INTO users (name) VALUES ('Alice'), ('Bob');"
 
     - name: Query Data
       run: |
-        PGPASSWORD=$DB_PASSWORD psql -h localhost -U $DB_USER -d $DB_NAME -c "SELECT * FROM users;"
+        mysql -h localhost -u $DB_USER -p$DB_PASSWORD $DB_NAME -e "SELECT * FROM users;"
