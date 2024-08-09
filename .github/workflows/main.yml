@@ -42,7 +42,7 @@ jobs:
     - name: Check MySQL Connectivity
       run: |
         echo "Checking MySQL connectivity..."
-        mysql -h 127.0.0.1 -P 3306 -u root -p$DB_PASSWORD --protocol=tcp -e "SHOW DATABASES;"
+        mysql -h 127.0.0.1 -P 3306 -u test -p$DB_PASSWORD --protocol=tcp -e "SHOW DATABASES;"
 
     - name: Create Database and User
       run: |
