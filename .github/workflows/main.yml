@@ -1,4 +1,4 @@
-name: Using database with Environment Variables
+name: Using MySQL with Environment Variables
 
 on: 
   push:
@@ -34,16 +34,16 @@ jobs:
       run: |
         echo "Waiting for MySQL to be ready..."
         for i in {1..30}; do
-          mysqladmin -h localhost -u $DB_USER -p$DB_PASSWORD ping &> /dev/null && break
+          mysqladmin -h 127.0.0.1 -P 3306 -u $DB_USER -p$DB_PASSWORD --protocol=tcp ping &> /dev/null && break
           echo "MySQL is not ready yet... retrying in 2 seconds."
           sleep 2
         done
 
     - name: Create Table and Insert Data
       run: |
-        mysql -h localhost -u $DB_USER -p$DB_PASSWORD $DB_NAME -e "CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50));"
-        mysql -h localhost -u $DB_USER -p$DB_PASSWORD $DB_NAME -e "INSERT INTO users (name) VALUES ('Alice'), ('Bob');"
+        mysql -h 127.0.0.1 -P 3306 -u $DB_USER -p$DB_PASSWORD $DB_NAME --protocol=tcp -e "CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50));"
+        mysql -h 127.0.0.1 -P 3306 -u $DB_USER -p$DB_PASSWORD $DB_NAME --protocol=tcp -e "INSERT INTO users (name) VALUES ('Alice'), ('Bob');"
 
     - name: Query Data
       run: |
-        mysql -h localhost -u $DB_USER -p$DB_PASSWORD $DB_NAME -e "SELECT * FROM users;"
+        mysql -h 127.0.0.1 -P 3306 -u $DB_USER -p$DB_PASSWORD $DB_NAME --protocol=tcp -e "SELECT * FROM users;"
