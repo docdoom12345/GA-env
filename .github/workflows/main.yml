@@ -6,16 +6,21 @@ on:
 jobs:
   job-with-mysql-8_0:
     runs-on: ubuntu-20.04
+    env:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: foo
+      MYSQL_USER: user1
+      MYSQL_PASSWORD: user1_password
     services:
       db:
         image: mysql:8.0
         ports:
           - 3306:3306
         env:
-          MYSQL_ROOT_PASSWORD: root_password
-          MYSQL_DATABASE: foo
-          MYSQL_USER: user1
-          MYSQL_PASSWORD: user1_password
+          MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: ${{ env.MYSQL_DATABASE }}
+          MYSQL_USER: ${{ env.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ env.MYSQL_PASSWORD }}
         options: >-
           --health-cmd "mysqladmin ping"
           --health-interval 10s
@@ -24,7 +29,11 @@ jobs:
     steps:
       - name: Show Docker containers
         run: docker ps -a
+      
       - name: Show databases for root user
-        run: mysql --protocol=tcp -h localhost -P 3306 -u root -proot_password -e "SHOW DATABASES"
+        run: |
+          mysql --protocol=tcp -h localhost -P 3306 -u root -p${{ env.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES"
+      
       - name: Show databases for user1
-        run: mysql --protocol=tcp -h localhost -P 3306 -u user1 -puser1_password -e "SHOW DATABASES"
+        run: |
+          mysql --protocol=tcp -h localhost -P 3306 -u ${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} -e "SHOW DATABASES"
