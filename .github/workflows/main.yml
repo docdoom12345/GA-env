@@ -36,14 +36,10 @@ jobs:
         done
 
     - name: Create Table and Insert Data
-      env:
-        PGPASSWORD: ${{ env.DB_PASSWORD }}
       run: |
-        psql -h localhost -U ${{ env.DB_USER }} -d ${{ env.DB_NAME }} -c "CREATE TABLE users (id SERIAL PRIMARY KEY, name VARCHAR(50));"
-        psql -h localhost -U ${{ env.DB_USER }} -d ${{ env.DB_NAME }} -c "INSERT INTO users (name) VALUES ('Alice'), ('Bob');"
+        PGPASSWORD=$DB_PASSWORD psql -h localhost -U $DB_USER -d $DB_NAME -c "CREATE TABLE users (id SERIAL PRIMARY KEY, name VARCHAR(50));"
+        PGPASSWORD=$DB_PASSWORD psql -h localhost -U $DB_USER -d $DB_NAME -c "INSERT INTO users (name) VALUES ('Alice'), ('Bob');"
 
     - name: Query Data
-      env:
-        PGPASSWORD: ${{ env.DB_PASSWORD }}
       run: |
-        psql -h localhost -U ${{ env.DB_USER }} -d ${{ env.DB_NAME }} -c "SELECT * FROM users;"
+        PGPASSWORD=$DB_PASSWORD psql -h localhost -U $DB_USER -d $DB_NAME -c "SELECT * FROM users;"
