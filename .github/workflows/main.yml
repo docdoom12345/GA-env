@@ -42,15 +42,11 @@ jobs:
     - name: Check MySQL Connectivity
       run: |
         echo "Checking MySQL connectivity..."
-        mysql -h 127.0.0.1 -P 3306 -u test -p$DB_PASSWORD --protocol=tcp -e "SHOW DATABASES;"
+        mysql -h 127.0.0.1 -P 3306 -u $DB_USER -p$DB_PASSWORD --protocol=tcp -e "SHOW DATABASES;"
 
-    - name: Create Database and User
+    - name: Grant Permissions to Test User
       run: |
         mysql -h 127.0.0.1 -P 3306 -u root -p$DB_PASSWORD --protocol=tcp -e "CREATE DATABASE IF NOT EXISTS $DB_NAME; GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD'; FLUSH PRIVILEGES;"
-
-    - name: Verify User Privileges
-      run: |
-        mysql -h 127.0.0.1 -P 3306 -u root -p$DB_PASSWORD --protocol=tcp -e "SELECT user, host FROM mysql.user;"
 
     - name: Create Table and Insert Data
       run: |
