@@ -41,7 +41,9 @@ jobs:
 
     - name: Check MySQL Connectivity
       run: |
-        echo "Checking MySQL connectivity..."
+        echo "Checking MySQL connectivity as root..."
+        mysql -h 127.0.0.1 -P 3306 -u root -p$DB_PASSWORD --protocol=tcp -e "SHOW DATABASES;"
+        echo "Checking MySQL connectivity as test user..."
         mysql -h 127.0.0.1 -P 3306 -u $DB_USER -p$DB_PASSWORD --protocol=tcp -e "SHOW DATABASES;"
 
     - name: Grant Permissions to Test User
